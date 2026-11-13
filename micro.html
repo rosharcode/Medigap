@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediCare - Hospital Appointment System</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f3f7fb;
+    color: #243447;
+    transition: .3s;
+}
+
+header {
+    background: #087f8c;
+    color: white;
+    padding: 18px 6%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+header h2 { font-size: 25px; }
+
+nav {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+nav a:hover { text-decoration: underline; }
+
+button {
+    background: #087f8c;
+    color: white;
+    border: 0;
+    padding: 11px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+button:hover { background: #05616b; }
+
+.page {
+    display: none;
+    min-height: 65vh;
+    padding: 30px 5%;
+}
+
+.page.active { display: block; }
+
+.hero {
+    text-align: center;
+    padding: 65px 8%;
+    background: linear-gradient(120deg,#d9f5f4,#e8f1ff);
+}
+
+.hero h1 {
+    font-size: 36px;
+    color: #087f8c;
+    margin-bottom: 15px;
+}
+
+.container {
+    width: 90%;
+    max-width: 1100px;
+    margin: 30px auto;
+}
+
+.section-title {
+    text-align: center;
+    color: #087f8c;
+    margin: 25px 0;
+}
+
+.cards, .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(210px,1fr));
+    gap: 18px;
+}
+
+.card, .form-box {
+    background: white;
+    padding: 23px;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px #00000012;
+}
+
+.card { text-align: center; }
+.card h3 { margin-bottom: 12px; }
+
+.form-box {
+    max-width: 480px;
+    margin: 25px auto;
+}
+
+.form-box h2 {
+    text-align: center;
+    color: #087f8c;
+    margin-bottom: 20px;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0 15px;
+    border: 1px solid #ccd5dd;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+label { font-weight: bold; }
+
+.stat {
+    background: #d9f5f4;
+    padding: 22px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background: #087f8c;
+    color: white;
+}
+
+footer {
+    text-align: center;
+    padding: 22px;
+    background: #087f8c;
+    color: white;
+    margin-top: 30px;
+}
+
+#chatBox {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    width: 280px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 3px 15px #0004;
+    padding: 12px;
+    display: none;
+    z-index: 5;
+}
+
+#chatMessages {
+    height: 160px;
+    overflow: auto;
+    padding: 8px;
+    font-size: 14px;
+}
+
+.dark {
+    background: #17212b;
+    color: #f1f1f1;
+}
+
+.dark .card,
+.dark .form-box,
+.dark table,
+.dark #chatBox {
+    background: #263746;
+    color: white;
+}
+
+.dark input, .dark select {
+    background: #34495e;
+    color: white;
+}
+
+.dark .stat { background: #34495e; }
+
+.hidden { display: none !important; }
+
+.hint {
+    font-size: 14px;
+    margin-top: 12px;
+}
+
+@media(max-width:600px) {
+    header { justify-content: center; }
+    nav { justify-content: center; }
+    .hero h1 { font-size: 27px; }
+    table { font-size: 12px; }
+    th, td { padding: 7px; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h2>🏥 MediCare</h2>
+
+    <nav id="mainNav" class="hidden">
+        <a onclick="showPage('home')">Home</a>
+        <a onclick="showPage('doctors')">Doctors</a>
+        <a onclick="showPage('appointment')">Appointment</a>
+        <a onclick="showPage('dashboard')">Dashboard</a>
+        <a onclick="logout()">Logout</a>
+    </nav>
+
+    <div id="authNav">
+        <button onclick="showPage('register')">Sign Up</button>
+    </div>
+
+    <button onclick="toggleTheme()">🌙 Theme</button>
+</header>
+
+<!-- SIGN IN PAGE - FIRST PAGE -->
+
+<section id="login" class="page active">
+    <div class="form-box">
+        <h2>Patient Sign In</h2>
+
+        <p style="text-align:center;margin-bottom:15px">
+            Please sign in to access MediCare.
+        </p>
+
+        <form id="loginForm">
+
+            <label>Email</label>
+            <input id="loginEmail" type="email"
+            placeholder="Enter your email" required>
+
+            <label>Password</label>
+            <input id="loginPassword" type="password"
+            placeholder="Enter your password" required>
+
+            <button type="submit">Sign In</button>
+
+        </form>
+
+        <p class="hint">
+            Don't have an account?
+            <a href="#" onclick="showPage('register')">
+                Create account
+            </a>
+        </p>
+    </div>
+</section>
+
+<!-- SIGN UP PAGE -->
+
+<section id="register" class="page">
+
+    <div class="form-box">
+        <h2>Create Patient Account</h2>
+
+        <form id="registerForm">
+
+            <label>Full Name</label>
+            <input id="regName" type="text"
+            minlength="2" placeholder="Enter your name" required>
+
+            <label>Email</label>
+            <input id="regEmail" type="email"
+            placeholder="Enter email" required>
+
+            <label>Password</label>
+            <input id="regPassword" type="password"
+            minlength="6" placeholder="Minimum 6 characters" required>
+
+            <button type="submit">Sign Up</button>
+
+        </form>
+
+        <p class="hint">
+            Already registered?
+            <a href="#" onclick="showPage('login')">Sign In</a>
+        </p>
+    </div>
+
+</section>
+
+<!-- HOME PAGE -->
+
+<section id="home" class="page">
+
+    <div class="hero">
+        <h1>Welcome to MediCare</h1>
+        <p>Your health, our priority. Book hospital appointments easily.</p>
+
+        <button onclick="showPage('appointment')">
+            Book Appointment
+        </button>
+    </div>
+
+    <div class="container">
+
+        <h2 class="section-title">Our Services</h2>
+
+        <div class="cards">
+
+            <div class="card">
+                <h3>🩺 General Checkup</h3>
+                <p>Regular health checkup and consultation.</p>
+            </div>
+
+            <div class="card">
+                <h3>❤️ Cardiology</h3>
+                <p>Heart health consultation services.</p>
+            </div>
+
+            <div class="card">
+                <h3>🦷 Dental Care</h3>
+                <p>Dental checkup and treatment services.</p>
+            </div>
+
+            <div class="card">
+                <h3>👨‍⚕️ Expert Doctors</h3>
+                <p>Connect with experienced doctors.</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- DOCTORS PAGE -->
+
+<section id="doctors" class="page">
+
+    <div class="container">
+        <h2 class="section-title">Our Doctors</h2>
+
+        <div class="cards">
+
+            <div class="card">
+                <h3>👨‍⚕️ Dr. Arun</h3>
+                <p>General Physician</p>
+                <p>Experience: 10 years</p>
+                <button onclick="bookDoctor('Dr. Arun')">Book Now</button>
+            </div>
+
+            <div class="card">
+                <h3>👩‍⚕️ Dr. Priya</h3>
+                <p>Cardiologist</p>
+                <p>Experience: 8 years</p>
+                <button onclick="bookDoctor('Dr. Priya')">Book Now</button>
+            </div>
+
+            <div class="card">
+                <h3>👨‍⚕️ Dr. Kumar</h3>
+                <p>Dentist</p>
+                <p>Experience: 7 years</p>
+                <button onclick="bookDoctor('Dr. Kumar')">Book Now</button>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- APPOINTMENT PAGE -->
+
+<section id="appointment" class="page">
+
+    <div class="form-box">
+        <h2>Book Appointment</h2>
+
+        <form id="appointmentForm">
+
+            <label>Patient Name</label>
+            <input id="patientName" type="text" required>
+
+            <label>Age</label>
+            <input id="patientAge" type="number"
+            min="1" max="120" required>
+
+            <label>Phone Number</label>
+            <input id="patientPhone" type="tel"
+            pattern="[0-9]{10}" placeholder="10 digit number" required>
+
+            <label>Choose Doctor</label>
+            <select id="doctor" required>
+                <option value="">Select Doctor</option>
+                <option>Dr. Arun</option>
+                <option>Dr. Priya</option>
+                <option>Dr. Kumar</option>
+            </select>
+
+            <label>Appointment Date</label>
+            <input id="appointmentDate" type="date" required>
+
+            <label>Appointment Time</label>
+            <select id="appointmentTime" required>
+                <option value="">Select Time</option>
+                <option>09:00 AM</option>
+                <option>10:00 AM</option>
+                <option>11:00 AM</option>
+                <option>02:00 PM</option>
+                <option>03:00 PM</option>
+            </select>
+
+            <button type="submit">Confirm Appointment</button>
+
+        </form>
+    </div>
+</section>
+
+<!-- DASHBOARD PAGE -->
+
+<section id="dashboard" class="page">
+
+    <div class="container">
+
+        <h2 class="section-title">Patient Dashboard</h2>
+
+        <h3 id="welcomeUser">Welcome, Patient!</h3>
+
+        <div class="stats">
+
+            <div class="stat">
+                <h2 id="totalAppointments">0</h2>
+                <p>Total Appointments</p>
+            </div>
+
+            <div class="stat">
+                <h2>3</h2>
+                <p>Available Doctors</p>
+            </div>
+
+            <div class="stat">
+                <h2>24/7</h2>
+                <p>Online Support</p>
+            </div>
+
+        </div>
+
+        <h3 style="margin-top:25px">Appointment History</h3>
+
+        <div style="overflow-x:auto">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Patient</th>
+                        <th>Doctor</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+
+                <tbody id="appointmentList"></tbody>
+            </table>
+
+        </div>
+    </div>
+</section>
+
+<!-- CALCULATOR PAGE -->
+
+<section id="calculator" class="page">
+
+    <div class="form-box">
+        <h2>Simple Calculator</h2>
+
+        <input id="num1" type="number" placeholder="First number">
+        <input id="num2" type="number" placeholder="Second number">
+
+        <select id="operator">
+            <option value="+">Addition (+)</option>
+            <option value="-">Subtraction (-)</option>
+            <option value="*">Multiplication (*)</option>
+            <option value="/">Division (/)</option>
+        </select>
+
+        <button onclick="calculate()">Calculate</button>
+
+        <h3 id="calcResult">Result:</h3>
+    </div>
+</section>
+
+<!-- CHAT ASSISTANT -->
+
+<button id="chatButton" class="hidden"
+onclick="toggleChat()"
+style="position:fixed;bottom:15px;left:15px">
+💬 Assistant
+</button>
+
+<div id="chatBox">
+
+    <h3>MediCare Assistant</h3>
+
+    <div id="chatMessages">
+        <p>Assistant: Hello! How can I help you?</p>
+    </div>
+
+    <input id="chatInput" placeholder="Ask something...">
+
+    <button onclick="sendMessage()">Send</button>
+    <button onclick="toggleChat()">Close</button>
+
+</div>
+
+<footer>
+
+    <p>© 2026 MediCare Hospital Appointment System</p>
+    <p>Educational Demo Project | All Rights Reserved</p>
+
+    <button id="calcButton" class="hidden"
+    onclick="showPage('calculator')">
+        Open Calculator
+    </button>
+
+</footer>
+
+<script>
+
+// PAGE ACCESS CONTROL
+
+const protectedPages = [
+    'home',
+    'doctors',
+    'appointment',
+    'dashboard',
+    'calculator'
+];
+
+function isLoggedIn() {
+    return sessionStorage.getItem('medicareLoggedIn') === 'true';
+}
+
+function updateNavigation() {
+
+    document.getElementById('mainNav')
+    .classList.toggle('hidden', !isLoggedIn());
+
+    document.getElementById('authNav')
+    .classList.toggle('hidden', isLoggedIn());
+
+    document.getElementById('chatButton')
+    .classList.toggle('hidden', !isLoggedIn());
+
+    document.getElementById('calcButton')
+    .classList.toggle('hidden', !isLoggedIn());
+}
+
+function showPage(id) {
+
+    if (protectedPages.includes(id) && !isLoggedIn()) {
+        alert('Please sign in first.');
+        id = 'login';
+    }
+
+    document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+    });
+
+    document.getElementById(id).classList.add('active');
+
+    if (id === 'dashboard') {
+        loadDashboard();
+    }
+}
+
+updateNavigation();
+
+// REGISTRATION
+
+document.getElementById('registerForm')
+.addEventListener('submit', function(e) {
+
+    e.preventDefault();
+
+    const user = {
+        name: document.getElementById('regName').value.trim(),
+        email: document.getElementById('regEmail').value.trim().toLowerCase(),
+        password: document.getElementById('regPassword').value
+    };
+
+    localStorage.setItem('medicareUser', JSON.stringify(user));
+
+    alert('Registration successful! Now sign in.');
+
+    this.reset();
+    showPage('login');
+});
+
+// LOGIN
+
+document.getElementById('loginForm')
+.addEventListener('submit', function(e) {
+
+    e.preventDefault();
+
+    const user = JSON.parse(
+        localStorage.getItem('medicareUser') || 'null'
+    );
+
+    if (!user) {
+        alert('Please create an account first.');
+        showPage('register');
+        return;
+    }
+
+    const email = document.getElementById('loginEmail')
+    .value.trim().toLowerCase();
+
+    const password = document.getElementById('loginPassword').value;
+
+    if (email === user.email && password === user.password) {
+
+        sessionStorage.setItem('medicareLoggedIn', 'true');
+
+        this.reset();
+        updateNavigation();
+
+        alert('Sign in successful! Welcome to MediCare.');
+
+        showPage('dashboard');
+
+    } else {
+        alert('Incorrect email or password. Please try again.');
+    }
+});
+
+// DOCTOR BOOKING
+
+function bookDoctor(name) {
+    document.getElementById('doctor').value = name;
+    showPage('appointment');
+}
+
+// APPOINTMENT DATE VALIDATION
+
+const dateInput = document.getElementById('appointmentDate');
+
+const now = new Date();
+
+dateInput.min = new Date(
+    now.getTime() - now.getTimezoneOffset() * 60000
+).toISOString().split('T')[0];
+
+// APPOINTMENT BOOKING
+
+document.getElementById('appointmentForm')
+.addEventListener('submit', function(e) {
+
+    e.preventDefault();
+
+    if (!isLoggedIn()) {
+        alert('Please sign in first.');
+        showPage('login');
+        return;
+    }
+
+    const appointment = {
+        patient: document.getElementById('patientName').value.trim(),
+        age: document.getElementById('patientAge').value,
+        phone: document.getElementById('patientPhone').value,
+        doctor: document.getElementById('doctor').value,
+        date: dateInput.value,
+        time: document.getElementById('appointmentTime').value
+    };
+
+    const list = JSON.parse(
+        localStorage.getItem('appointments') || '[]'
+    );
+
+    list.push(appointment);
+
+    localStorage.setItem('appointments', JSON.stringify(list));
+
+    alert('Appointment booked successfully!');
+
+    this.reset();
+    showPage('dashboard');
+});
+
+// DASHBOARD
+
+function loadDashboard() {
+
+    const user = JSON.parse(
+        localStorage.getItem('medicareUser') || 'null'
+    );
+
+    const list = JSON.parse(
+        localStorage.getItem('appointments') || '[]'
+    );
+
+    document.getElementById('welcomeUser').textContent =
+        'Welcome, ' + (user ? user.name : 'Patient') + '!';
+
+    document.getElementById('totalAppointments').textContent =
+        list.length;
+
+    const body = document.getElementById('appointmentList');
+
+    body.innerHTML = '';
+
+    if (!list.length) {
+        body.innerHTML =
+        '<tr><td colspan="4">No appointments yet.</td></tr>';
+        return;
+    }
+
+    list.forEach(a => {
+
+        const tr = document.createElement('tr');
+
+        [a.patient, a.doctor, a.date, a.time].forEach(value => {
+
+            const td = document.createElement('td');
+
+            td.textContent = value;
+            tr.appendChild(td);
+
+        });
+
+        body.appendChild(tr);
+
+    });
+}
+
+// LOGOUT
+
+function logout() {
+
+    sessionStorage.removeItem('medicareLoggedIn');
+
+    updateNavigation();
+
+    document.getElementById('chatBox').style.display = 'none';
+
+    alert('You have signed out.');
+
+    showPage('login');
+}
+
+// DARK AND LIGHT MODE
+
+function toggleTheme() {
+    document.body.classList.toggle('dark');
+}
+
+// CALCULATOR
+
+function calculate() {
+
+    const x = document.getElementById('num1').value;
+    const y = document.getElementById('num2').value;
+
+    const op = document.getElementById('operator').value;
+
+    if (x === '' || y === '') {
+        alert('Enter both numbers.');
+        return;
+    }
+
+    const a = Number(x);
+    const b = Number(y);
+
+    if (op === '/' && b === 0) {
+        alert('Cannot divide by zero.');
+        return;
+    }
+
+    const result =
+        op === '+' ? a + b :
+        op === '-' ? a - b :
+        op === '*' ? a * b : a / b;
+
+    document.getElementById('calcResult').textContent =
+        'Result: ' + result;
+}
+
+// CHAT ASSISTANT
+
+function toggleChat() {
+
+    const box = document.getElementById('chatBox');
+
+    box.style.display =
+        box.style.display === 'block' ? 'none' : 'block';
+}
+
+function sendMessage() {
+
+    const input = document.getElementById('chatInput');
+
+    const msg = input.value.trim().toLowerCase();
+
+    if (!msg) return;
+
+    const area = document.getElementById('chatMessages');
+
+    const userMessage = document.createElement('p');
+
+    userMessage.textContent = 'You: ' + input.value;
+
+    area.appendChild(userMessage);
+
+    let reply = 'Please contact hospital reception for more information.';
+
+    if (msg.includes('appointment') || msg.includes('book')) {
+        reply = 'Open the Appointment page to book a visit.';
+    }
+
+    else if (msg.includes('doctor')) {
+        reply = 'Visit the Doctors page to view available doctors.';
+    }
+
+    else if (msg.includes('hello') || msg.includes('hi')) {
+        reply = 'Hello! Welcome to MediCare.';
+    }
+
+    else if (msg.includes('time')) {
+        reply = 'Demo slots: 9 AM, 10 AM, 11 AM, 2 PM and 3 PM.';
+    }
+
+    const botMessage = document.createElement('p');
+
+    botMessage.textContent = 'Assistant: ' + reply;
+
+    area.appendChild(botMessage);
+
+    input.value = '';
+
+    area.scrollTop = area.scrollHeight;
+}
+
+</script>
+
+</body>
+</html>
